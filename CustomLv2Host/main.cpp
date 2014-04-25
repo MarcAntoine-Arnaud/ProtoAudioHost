@@ -3,8 +3,8 @@
 #include <exception>
 #include <iostream>
 
-#include "Node.h"
-#include "Lv2Graph.h"
+#include "Node.hpp"
+#include "Lv2Graph.hpp"
 
 
 /**

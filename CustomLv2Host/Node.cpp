@@ -2,10 +2,10 @@
 #include <stdexcept> //runtime error
 #include <iostream>
 
-#include "Node.h"
+#include "Node.hpp"
 
-#include "Lv2Graph.h"
-#include "Debugger.h"
+#include "Lv2Graph.hpp"
+#include "Debugger.hpp"
 
 
 namespace sound

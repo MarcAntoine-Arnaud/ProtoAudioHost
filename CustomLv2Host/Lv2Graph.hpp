@@ -4,7 +4,7 @@
 // Lilv wrapper C++
 #include <lilv/lilvmm.hpp>
 
-#include "Node.h"
+#include "Node.hpp"
 
 namespace sound
 {

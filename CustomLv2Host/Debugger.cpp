@@ -1,4 +1,4 @@
-#include "Debugger.h"
+#include "Debugger.hpp"
 
 #include <math.h>
 #include <stdlib.h>
