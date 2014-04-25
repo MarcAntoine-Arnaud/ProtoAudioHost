@@ -53,7 +53,7 @@ void Node::connectAudioInput( std::vector< short >& audioInputBuffer)
   
     if( port.is_a( getAudioURIProperty( ) ) && port.is_a( getInputURIProperty( ) ) )
     {
-      _pInstance->connect_port( port.get_index(), &audioInputBuffer[0] );
+      _pInstance->connect_port( portIndex, &audioInputBuffer[0] );
     }
   }
 }
@@ -66,7 +66,7 @@ void Node::connectAudioOutput( std::vector< short >& audioOutputBuffer)
   
     if( port.is_a( getAudioURIProperty( ) ) && port.is_a( getOutputURIProperty( ) ) )
     {
-      _pInstance->connect_port( port.get_index(), &audioOutputBuffer[0] );
+      _pInstance->connect_port( portIndex, &audioOutputBuffer[0] );
     }
   }
 }
@@ -108,11 +108,11 @@ void Node::setParam( const std::string& portSymbol, const float value)
   
   if ( port.is_a( getInputURIProperty( ) ) )
   {
-    _controlBuffers.at( port.get_index() ) = value;
+    _controlBuffers.at( lilv_port_get_index( getPlugin(), port ) ) = value;
   }
   else // port.is_a( getOutputURIProperty( ) )
   {
-    _controlBuffers.at( port.get_index() ) = value;
+    _controlBuffers.at( lilv_port_get_index( getPlugin(), port ) ) = value;
   }
 }
 
