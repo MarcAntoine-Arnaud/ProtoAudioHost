@@ -1,7 +1,7 @@
 BIN_DIR = bin
 BIN     = customLv2Host
 
-INC_DIR = -I/datas/cnt/workspace/lv2/lilv-0.18.0/lilv-install/include/lilv-0
+INC_DIR = -I/usr/include/lilv-0
 
 LIB_DIR = -L/datas/cnt/workspace/lv2/lilv-0.18.0/lilv-install/lib
 LIB     = -lsndfile -llilv-0
