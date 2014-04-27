@@ -1,0 +1,29 @@
+import os
+
+Import( "env" )
+Import( "installPrefix" )
+
+Import( "lilv_incdir" )
+Import( "lilv_lib" )
+
+lv2host = env.StaticLibrary(
+    'lv2host',
+    Glob( '*/*.cpp' ) ,
+    LIBS = [
+        lilv_lib,
+    ]
+)
+
+slv2host = env.SharedLibrary(
+    'lv2host',
+    Glob( '*/*.cpp' ) ,
+    LIBS = [
+        lilv_lib,
+    ]
+)
+
+env.InstallVersionedLib( os.path.join( installPrefix, "lib" ), slv2host, SHLIBVERSION="0.0.1" )
+
+
+Export( "lv2host" )
+Export( "slv2host" )

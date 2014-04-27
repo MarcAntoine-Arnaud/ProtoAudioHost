@@ -1,52 +1,63 @@
-#include "Debugger.hpp"
+#include "lv2/common/Debugger.hpp"
 
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
+#include <stdexcept>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 
-namespace sound 
+namespace lv2host 
 {
 
-void Debugger::print_port(LilvWorld* world,
+void Debugger::print_port( LilvWorld* world,
                         const LilvPlugin* p,
                         uint32_t          index,
                         float*            mins,
                         float*            maxes,
-                        float*            defaults)
+                        float*            defaults )
 {
-    const LilvPort* port = lilv_plugin_get_port_by_index(p, index);
+    const LilvPort* port = lilv_plugin_get_port_by_index( p, index );
 
-    printf("\n\tPort %d:\n", index);
+    std::cout << std::endl << "Port " << index << " :" << std::endl;
 
-    if (!port) {
-    printf("\t\tERROR: Illegal/nonexistent port\n");
-    return;
+    if( !port )
+    {
+        throw std::runtime_error( "Illegal/non-existent port" );
     }
 
     bool first = true;
 
-    const LilvNodes* classes = lilv_port_get_classes(p, port);
-    printf("\t\tType:        ");
-    LILV_FOREACH(nodes, i, classes) {
-    const LilvNode* value = lilv_nodes_get(classes, i);
-    if (!first) {
-        printf("\n\t\t             ");
-    }
-    printf("%s", lilv_node_as_uri(value));
-    first = false;
+    const LilvNodes* classes = lilv_port_get_classes( p, port );
+    std::cout << "\tType:        ";
+
+    LILV_FOREACH( nodes, i, classes )
+    {
+        const LilvNode* value = lilv_nodes_get( classes, i );
+        if( !first )
+        {
+            printf("\n\t\t             ");
+        }
+        std::cout << lilv_node_as_uri(value);
+        first = false;
     }
 
     LilvNode* supports_event_pred = lilv_new_uri(world, LV2_EVENT__supportsEvent);
     LilvNode* event_class = lilv_new_uri(world, LILV_URI_EVENT_PORT);
-    if (lilv_port_is_a(p, port, event_class)) {
-    LilvNodes* supported = lilv_port_get_value(p, port, supports_event_pred);
-    if (lilv_nodes_size(supported) > 0) {
-        printf("\n\t\tSupported events:\n");
-        LILV_FOREACH(nodes, i, supported) {
-            const LilvNode* value = lilv_nodes_get(supported, i);
-            printf("\t\t\t%s\n", lilv_node_as_uri(value));
+    if( lilv_port_is_a( p, port, event_class) )
+    {
+        LilvNodes* supported = lilv_port_get_value(p, port, supports_event_pred);
+
+        if( lilv_nodes_size(supported) > 0)
+        {
+            printf("\n\t\tSupported events:\n");
+            LILV_FOREACH( nodes, i, supported )
+            {
+                const LilvNode* value = lilv_nodes_get(supported, i);
+                printf("\t\t\t%s\n", lilv_node_as_uri(value));
+            }
         }
-    }
-    lilv_nodes_free(supported);
+        lilv_nodes_free(supported);
     }
 
     LilvScalePoints* points = lilv_port_get_scale_points(p, port);
@@ -118,97 +129,112 @@ void Debugger::print_port(LilvWorld* world,
 
 void Debugger::print_plugin(LilvWorld* world, const LilvPlugin* p)
 {
+    size_t firstWidth = 15;
     LilvNode* val = NULL;
 
+    std::cout << std::left;
+
     // URI
-    printf("%s\n\n", lilv_node_as_uri(lilv_plugin_get_uri(p)));
+    std::cout << lilv_node_as_uri( lilv_plugin_get_uri( p ) ) << std::endl;
+    std::cout << std::endl;
 
     // Name
-    val = lilv_plugin_get_name(p);
-    if (val) {
-    printf("\tName:              %s\n", lilv_node_as_string(val));
-    lilv_node_free(val);
+    val = lilv_plugin_get_name( p );
+    if( val )
+    {
+        std::cout << std::setw( firstWidth ) << "Name:" << lilv_node_as_string( val ) << std::endl;
+        lilv_node_free(val);
     }
 
     // Class
-    const LilvPluginClass* pclass      = lilv_plugin_get_class(p);
-    const LilvNode*       class_label = lilv_plugin_class_get_label(pclass);
-    if (class_label) {
-    printf("\tClass:             %s\n", lilv_node_as_string(class_label));
+    const LilvPluginClass* pclass = lilv_plugin_get_class( p );
+    const LilvNode* class_label = lilv_plugin_class_get_label( pclass );
+    if( class_label )
+    {
+        std::cout << std::setw( firstWidth ) << "Class:" << lilv_node_as_string( class_label ) << std::endl;
     }
 
     // Author
-    val = lilv_plugin_get_author_name(p);
-    if (val) {
-    printf("\tAuthor:            %s\n", lilv_node_as_string(val));
-    lilv_node_free(val);
-    }
-    else {
-    printf("\tAuthor:            No author specified\n");
+    std::string author = "No author specified";
+    val = lilv_plugin_get_author_name( p );
+    if( val )
+    {
+        author = lilv_node_as_string( val );
+        lilv_node_free(val);
     }
 
+    std::cout << std::setw( firstWidth ) << "Author:" << author << std::endl;
+
     // Author Email
-    val = lilv_plugin_get_author_email(p);
-    if (val) {
-    printf("\tAuthor Email:      %s\n", lilv_node_as_uri(val));
-    lilv_node_free(val);
+    val = lilv_plugin_get_author_email( p );
+    if( val )
+    {
+        std::cout << std::setw( firstWidth ) << "Author Email:" << lilv_node_as_uri( val ) << std::endl;
+        lilv_node_free(val);
     }
 
     // Check plugin
-    bool isPluginOk = lilv_plugin_verify(p);
-    if (isPluginOk) {
-    printf("\tCheck plugin:      OK\n");
-    } else {
-    printf("\tCheck plugin:      KO\n");
-    }
-
+    bool isPluginOk = lilv_plugin_verify( p );
+    std::cout << std::setw( firstWidth ) << "Check plugin:" << ( isPluginOk ? "OK" : "KO" ) << std::endl;
+    
     // Author Homepage
-    val = lilv_plugin_get_author_homepage(p);
-    if (val) {
-    printf("\tAuthor Homepage:   %s\n", lilv_node_as_uri(val));
-    lilv_node_free(val);
+    val = lilv_plugin_get_author_homepage( p );
+    if( val )
+    {
+        std::cout << std::setw( firstWidth ) << "Author Homepage:" << lilv_node_as_uri( val ) << std::endl;
+        lilv_node_free(val);
     }
 
-    if (lilv_plugin_has_latency(p)) {
-    uint32_t latency_port = lilv_plugin_get_latency_port_index(p);
-    printf("\tHas latency:       yes, reported by port %d\n", latency_port);
-    } else {
-    printf("\tHas latency:       no\n");
+    std::ostringstream msgLatency;
+
+    if( lilv_plugin_has_latency(p) )
+    {
+        uint32_t latency_port = lilv_plugin_get_latency_port_index(p);
+        msgLatency << "yes, reported by port ";
+        msgLatency << latency_port;
     }
+    else
+    {
+        msgLatency << "no";
+    }
+
+    std::cout << std::setw( firstWidth ) << "Has latency: " << msgLatency.str() << std::endl;
 
     // Bundle
-    printf("\tBundle:            %s\n",
-         lilv_node_as_uri(lilv_plugin_get_bundle_uri(p)));
+    std::cout << std::setw( firstWidth ) << "Bundle:" << lilv_node_as_uri( lilv_plugin_get_bundle_uri( p ) ) << std::endl;
 
     // Binary
     const LilvNode* binary_uri = lilv_plugin_get_library_uri(p);
-    if (binary_uri) {
-    printf("\tBinary:            %s\n",
-           lilv_node_as_uri(lilv_plugin_get_library_uri(p)));
+    if( binary_uri )
+    {
+        std::cout << std::setw( firstWidth ) << "Binary:" << lilv_node_as_uri( binary_uri ) << std::endl;
     }
 
     // UIs
-    LilvUIs* uis = lilv_plugin_get_uis(p);
-    if (lilv_nodes_size(uis) > 0) {
-    printf("\tUIs:\n");
-    LILV_FOREACH(uis, i, uis) {
-        const LilvUI* ui = lilv_uis_get(uis, i);
-        printf("\t\t%s\n", lilv_node_as_uri(lilv_ui_get_uri(ui)));
+    LilvUIs* uis = lilv_plugin_get_uis( p );
+    if( lilv_nodes_size( uis ) > 0 )
+    {
+        std::cout << std::setw( firstWidth ) << "UIs:" << std::endl;
+        LILV_FOREACH( uis, i, uis )
+        {
+            const LilvUI* ui = lilv_uis_get( uis, i );
+            printf( "\t\t%s\n", lilv_node_as_uri( lilv_ui_get_uri( ui ) ) );
 
-        const char* binary = lilv_node_as_uri(lilv_ui_get_binary_uri(ui));
 
-        const LilvNodes* types = lilv_ui_get_classes(ui);
-        LILV_FOREACH(nodes, t, types) {
-            printf("\t\t\tClass:  %s\n",
-                   lilv_node_as_uri(lilv_nodes_get(types, t)));
+            const LilvNodes* types = lilv_ui_get_classes( ui );
+            LILV_FOREACH( nodes, t, types )
+            {
+                printf("\t\t\tClass:  %s\n",
+                       lilv_node_as_uri(lilv_nodes_get(types, t)));
+            }
+
+            const char* binary = lilv_node_as_uri( lilv_ui_get_binary_uri( ui ) );
+            if (binary)
+                printf("\t\t\tBinary: %s\n", binary);
+
+            printf("\t\t\tBundle: %s\n",
+                   lilv_node_as_uri(lilv_ui_get_bundle_uri(ui)));
         }
-
-        if (binary)
-            printf("\t\t\tBinary: %s\n", binary);
-
-        printf("\t\t\tBundle: %s\n",
-               lilv_node_as_uri(lilv_ui_get_bundle_uri(ui)));
-    }
     }
     lilv_uis_free(uis);
 
@@ -320,15 +346,19 @@ void Debugger::print_plugin(LilvWorld* world, const LilvPlugin* p)
     lilv_node_free(label_pred);
 }
 
-void Debugger::list_plugins(const LilvPlugins* list)
+void Debugger::listPlugins( const LilvPlugins* list )
 {
-    printf("----- List of plugins -----\n");
+    std::cout << "----- List of plugins -----" << std::endl;
 
-    LILV_FOREACH(plugins, i, list) {
-        const LilvPlugin* p = lilv_plugins_get(list, i);
-        LilvNode* n = lilv_plugin_get_name(p);
-        lilv_node_free(n);
-        printf("%s \t %s\n", lilv_node_as_uri(lilv_plugin_get_uri(p)), lilv_node_as_string(n));
+    LILV_FOREACH( plugins, i, list )
+    {
+        const LilvPlugin* p = lilv_plugins_get( list, i );
+        LilvNode* n = lilv_plugin_get_name( p );
+
+        std::cout << std::left << std::setw( 80 ) << lilv_node_as_uri( lilv_plugin_get_uri( p ) );
+        std::cout << lilv_node_as_string( n ) << std::endl;
+
+        lilv_node_free( n );
     }
 }
 

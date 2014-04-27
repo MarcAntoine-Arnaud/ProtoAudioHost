@@ -7,7 +7,7 @@
 // Lilv wrapper C++
 #include <lilv/lilvmm.hpp>
 
-namespace sound
+namespace lv2host
 {
 
 class Lv2Graph;

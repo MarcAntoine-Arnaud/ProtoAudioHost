@@ -1,4 +1,7 @@
 
+.sconsign.dblite
+build
+
 bin
 
 *~

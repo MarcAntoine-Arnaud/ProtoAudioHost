@@ -1,0 +1,30 @@
+
+installPrefix  = "/usr/local"
+
+lilv_incdir = "/usr/include/lilv-0"
+lilv_lib = "lilv-0"
+
+env = Environment().Clone()
+
+env.Append(
+	CPPPATH = [
+		"#",
+		lilv_incdir,
+	],
+)
+
+Export( "env" )
+Export( "installPrefix" )
+
+Export( "lilv_incdir" )
+Export( "lilv_lib" )
+
+VariantDir( 'build/lv2', 'lv2', duplicate = 0 )
+VariantDir( 'build/app', 'app', duplicate = 0 )
+
+SConscript( [
+        'build/lv2/SConscript',
+        'build/app/SConscript',
+] )
+
+

@@ -2,28 +2,26 @@
 #include <stdexcept> //runtime error
 #include <iostream>
 
-#include "Node.hpp"
+#include "lv2/node/Node.hpp"
 
-#include "Lv2Graph.hpp"
-#include "Debugger.hpp"
+#include "lv2/graph/Graph.hpp"
+#include "lv2/common/Debugger.hpp"
 
 
-namespace sound
+namespace lv2host
 {
 
 Node::Node( Lv2Graph* graph, const std::string pluginURIstr, int samplerate )
 : _pGraph(graph)
 {
-  Property pluginURI = _pGraph->getWorld()->new_uri( &( pluginURIstr[0] ) );
-  Lilv::Plugin plugin = ( ( Lilv::Plugins )_pGraph->getWorld()->get_all_plugins() ).get_by_uri( pluginURI );
-
-  // test
-  Debugger::print_plugin( _pGraph->getWorld()->me, plugin.me );
+  Property pluginURI = _pGraph->getWorld().new_uri( &( pluginURIstr[0] ) );
+  Lilv::Plugin plugin = ( ( Lilv::Plugins )_pGraph->getWorld().get_all_plugins() ).get_by_uri( pluginURI );
   
   _pInstance = Lilv::Instance::create( plugin, samplerate, NULL );
+
+  // instantiation failed
   if( !_pInstance )
   {
-    // instantiation failed
     throw std::bad_alloc( );
   }
   
@@ -35,7 +33,7 @@ Node::Node( Lv2Graph* graph, const std::string pluginURIstr, int samplerate )
 
 Node::~Node()
 {
-  _pInstance->deactivate();
+  //_pInstance->deactivate();
   //pInstance->free();
 }
 
@@ -100,7 +98,7 @@ void Node::connectControls( )
 
 void Node::setParam( const std::string& portSymbol, const float value)
 {
-  Lilv::Port port = getPlugin( ).get_port_by_symbol( _pGraph->getWorld()->new_string(&portSymbol[0]) );
+  Lilv::Port port = getPlugin( ).get_port_by_symbol( _pGraph->getWorld().new_string(&portSymbol[0]) );
   if( ! port.me )
   {
     throw std::runtime_error( portSymbol + " : param not found."  );
@@ -122,36 +120,36 @@ void Node::process(size_t sampleCount)
 }
 
 Lilv::Plugin Node::getPlugin( ) const {
-  return ( ( Lilv::Plugins )_pGraph->getWorld()->get_all_plugins() ).get_by_uri( getPluginURIProperty( ) );
+  return ( ( Lilv::Plugins )_pGraph->getWorld().get_all_plugins() ).get_by_uri( getPluginURIProperty( ) );
 }
 
 const Node::Property Node::getPluginURIProperty( ) const 
 { 
-  return _pGraph->getWorld()->new_uri( &( _pInstance->get_descriptor()->URI[0] ) ); 
+  return _pGraph->getWorld().new_uri( &( _pInstance->get_descriptor()->URI[0] ) ); 
 }
 
 const Node::Property Node::getAudioURIProperty( ) const 
 { 
-  return _pGraph->getWorld()->new_uri( LILV_URI_AUDIO_PORT ); 
+  return _pGraph->getWorld().new_uri( LILV_URI_AUDIO_PORT ); 
 }
 
 const Node::Property Node::getInputURIProperty( ) const 
 { 
-  return _pGraph->getWorld()->new_uri( LILV_URI_INPUT_PORT ); 
+  return _pGraph->getWorld().new_uri( LILV_URI_INPUT_PORT ); 
 }
 
 const Node::Property Node::getOutputURIProperty( ) const 
 { 
-  return _pGraph->getWorld()->new_uri( LILV_URI_OUTPUT_PORT ); }
+  return _pGraph->getWorld().new_uri( LILV_URI_OUTPUT_PORT ); }
 
 const Node::Property Node::getControlURIProperty( ) const 
 { 
-  return _pGraph->getWorld()->new_uri( LILV_URI_CONTROL_PORT ); 
+  return _pGraph->getWorld().new_uri( LILV_URI_CONTROL_PORT ); 
 }
 
 const Node::Property Node::getSymbolProperty( const std::string& symbol ) const 
 { 
-  return _pGraph->getWorld()->new_string( &symbol[0] ); 
+  return _pGraph->getWorld().new_string( &symbol[0] ); 
 }
 
 }

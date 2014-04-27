@@ -4,7 +4,7 @@
 #include "lv2/lv2plug.in/ns/ext/presets/presets.h"
 #include "lv2/lv2plug.in/ns/ext/event/event.h"
 
-namespace sound
+namespace lv2host
 {
 
 /**
@@ -23,7 +23,7 @@ struct Debugger
   static void print_plugin(LilvWorld* world,
                           const LilvPlugin* p);
 
-  static void list_plugins(const LilvPlugins* list);
+  static void listPlugins(const LilvPlugins* list);
   
 };
 

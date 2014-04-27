@@ -1,16 +1,18 @@
+
+#include "lv2/graph/Graph.hpp"
+#include "lv2/common/Debugger.hpp"
+
+#include <cstring>
 #include <iostream>
 #include <exception>
+#include <cassert>
 
-#include "Lv2Graph.hpp"
-
-namespace sound
+namespace lv2host
 {
 
 Lv2Graph::Lv2Graph()
+  : World()
 {
-  _pWorld = new Lilv::World();
-  _pWorld->load_all();
-
   initAudioBuffers();
 }
 
@@ -24,10 +26,9 @@ void Lv2Graph::initAudioBuffers()
 
 Lv2Graph::~Lv2Graph()
 {
-  delete _pWorld;
   for ( size_t indexNode = 0; indexNode < _nodes.size(); ++indexNode )
   {
-	  delete _nodes.at(indexNode);
+	  //delete _nodes.at(indexNode);
   }
 }
 
@@ -47,26 +48,33 @@ void Lv2Graph::connect( Node& node1, Node& node2 )
   node2.connectAudioOutput( _audioBuffers.at(2) );
 }
 
-void Lv2Graph::processFrame( const short* bufferIn, short* bufferOut )
+void Lv2Graph::processFrame( const std::vector<short>& bufferIn, std::vector<short>& bufferOut )
 {
-  // if the graph is empty
-  if ( _nodes.size() == 0 )
+  assert( bufferIn.size() == bufferOut.size() );
+
+  for( size_t index; index < _audioBuffers.size(); ++ index )
   {
-    bufferOut[0] = bufferIn[0];
+    _audioBuffers.resize( bufferIn.size() );
+  }
+
+  // if the graph is empty
+  if( _nodes.size() == 0 )
+  {
+    memcpy( &bufferOut[0], &bufferIn[0], bufferIn.size() * sizeof( bufferIn.at( 0 ) ) );
     return;
   }
 
   // copy input
-  _audioBuffers.at(0)[0] = bufferIn[0];
+  memcpy( &_audioBuffers.front()[0], &bufferIn[0], bufferIn.size() * sizeof( bufferIn.at( 0 ) ) );
   
   // process nodes
   for ( unsigned int indexInstance = 0; indexInstance < _nodes.size(); ++indexInstance )
   {
-    getNode( indexInstance ).process( 1 );
+    //getNode( indexInstance ).process( 1 );
   }
   
   // copy output
-  bufferOut[0] = _audioBuffers.at(2)[0];
+  memcpy( &bufferOut[0], &_audioBuffers.back()[0], bufferIn.size() * sizeof( bufferIn.at( 0 ) ) );
 }
 
 }

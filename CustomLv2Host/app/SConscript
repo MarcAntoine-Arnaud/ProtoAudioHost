@@ -1,0 +1,35 @@
+import os
+
+Import( "env" )
+Import( "installPrefix" )
+
+Import( "lilv_lib" )
+Import( "lv2host" )
+
+lv2ls = env.Program(
+    'lv2ls',
+    Glob( 'listPlugins/*.cpp' ) ,
+    LIBS = [
+        lv2host,
+        lilv_lib,
+    ],
+    CXXFLAGS = [
+        '-std=c++11'
+    ],
+)
+
+lv2do = env.Program(
+    'lv2do',
+    Glob( 'process/*.cpp' ) ,
+    LIBS = [
+        lv2host,
+        lilv_lib,
+        "sndfile",
+    ],
+    CXXFLAGS = [
+        '-std=c++11'
+    ],
+)
+
+env.InstallVersionedLib( os.path.join( installPrefix, "bin" ), lv2ls, SHLIBVERSION="0.0.1" )
+env.InstallVersionedLib( os.path.join( installPrefix, "bin" ), lv2do, SHLIBVERSION="0.0.1" )

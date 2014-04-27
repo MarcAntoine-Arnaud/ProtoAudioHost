@@ -1,17 +1,20 @@
 #ifndef LV2_GRAPH_H
 #define LV2_GRAPH_H
 
-// Lilv wrapper C++
+#include <lv2/node/Node.hpp>
+#include <lv2/common/World.hpp>
+
 #include <lilv/lilvmm.hpp>
 
-#include "Node.hpp"
+#include <vector>
 
-namespace sound
+namespace lv2host
 {
 
-class Lv2Graph
+class Lv2Graph : protected World
 {
 public:
+
   Lv2Graph();
   ~Lv2Graph();
 
@@ -19,10 +22,14 @@ public:
   
   void connect( Node& node1, Node& node2 );
 
-  void processFrame( const short* bufferIn, short* bufferOut );
+  void processFrame( const std::vector<short>& bufferIn, std::vector<short>& bufferOut );
 
-  Lilv::World* getWorld() const {return _pWorld;}
+  Lilv::World& getWorld() { return World::_world; }
   Node& getNode( size_t indexNode ) const { return *_nodes.at(indexNode); }
+
+  std::vector< short >& getInputBuffer();
+  std::vector< short >& getOutputBuffer(){ return _audioBuffers.back(); };
+
   
   /**
   * Size of audio buffers.
@@ -32,11 +39,6 @@ public:
 private:
 
   void initAudioBuffers();
-
-  /**
-  * Contains all data of all lv2 plugins on the system.
-  */
-  Lilv::World* _pWorld;
 
   /**
   * The list of nodes (intances) in the graph.
@@ -51,4 +53,4 @@ private:
 
 }
 
-#endif //LV2_GRAPH_H
+#endif
