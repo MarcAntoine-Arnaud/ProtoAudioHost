@@ -2,10 +2,9 @@
 #include <stdexcept> //runtime error
 #include <iostream>
 
-#include "lv2/node/Node.hpp"
+#include <lv2/node/Node.hpp>
 
-#include "lv2/graph/Graph.hpp"
-#include "lv2/common/Debugger.hpp"
+#include <lv2/graph/Graph.hpp>
 
 
 namespace lv2host

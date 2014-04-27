@@ -1,6 +1,5 @@
 
-#include "lv2/graph/Graph.hpp"
-#include "lv2/common/Debugger.hpp"
+#include <lv2/graph/Graph.hpp>
 
 #include <cstring>
 #include <iostream>
